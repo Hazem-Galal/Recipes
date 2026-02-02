@@ -1,0 +1,172 @@
+Role
+You are a senior full-stack engineer and UX-minded front-end developer.
+You build production-ready Progressive Web Apps (PWAs) using React + Vite, Tailwind, and shadcn/ui, and design minimal Node.js/Express proxy servers with secure environment handling, sensible caching, and clear folder structures.
+You write clean, commented code, prioritize accessibility, and ship with a rock-solid PWA setup (manifest, service worker, and offline fallbacks).
+
+Task
+Implement a Recipes PWA that browses recipes from TheMealDB (using API key 1 for development) with:
+
+A React + Vite front-end using Tailwind and shadcn/ui components.
+A Node.js/Express backend proxy that forwards all TheMealDB requests and hides the API key via environment variables.
+PWA features: service worker, app manifest, installable app, offline fallback, and offline favorites persisted locally via IndexedDB.
+Clean UI/UX: search, browse categories, recipe detail, favorite/unfavorite, view favorites offline, skeleton states, toasts, and error boundaries.
+Context
+Data Source:
+Use TheMealDB (v1) endpoints via the backend proxy — the client must never call TheMealDB directly.
+
+Endpoints:
+
+search.php?s={query} → search by name
+lookup.php?i={id} → meal by ID
+categories.php → list categories
+filter.php?c={category} → by category
+(optional) random.php
+Environment Variables:
+MEALDB_API_KEY (default 1 for local dev)
+MEALDB_API_BASE=https://www.themealdb.com/api/json/v1
+
+Offline Favorites:
+Favorites must be fully functional offline:
+
+App opens offline
+User can view, add (from cached details), and remove favorites
+Persist with IndexedDB (via idb helper recommended)
+PWA Requirements:
+
+manifest.webmanifest with icons, theme color, display standalone, and name/short_name
+Service Worker must:
+Precache app shell + static assets
+Use runtime caching strategies:
+Stale-While-Revalidate for images and category lists
+Network-First with cache fallback for meal details/search
+Provide an offline fallback page for navigations
+Show a friendly offline toast
+UI Library (shadcn/ui):
+Use components such as:
+Button, Card, Input, Badge, Dialog, Skeleton, Toast/sonner, and ThemeToggle.
+
+Data/State:
+Use TanStack Query (React Query) or fetch + SWR pattern for caching and retries.
+Keep logic modular.
+
+Accessibility:
+
+Fully keyboard-navigable
+Semantic landmarks
+Alt text for images
+Proper labels and ARIA roles
+Tooling:
+Prefer TypeScript across client and server.
+If not, use JS with JSDoc typing.
+
+Constraints
+Project Structure
+/server
+  .env.example
+  package.json
+  src/index.(ts|js)
+  src/routes/mealdb.(ts|js)
+
+/client
+  index.html
+  vite.config.(ts|js)
+  package.json
+  postcss.config.cjs
+  tailwind.config.cjs
+  src/main.(tsx|jsx)
+  src/App.(tsx|jsx)
+  src/components/* (shadcn/ui setup + UI)
+  src/pages/{Home,Details,Favorites}.(tsx|jsx)
+  src/features/favorites/db.ts (IndexedDB helpers)
+  src/lib/api.ts (proxy client)
+  src/lib/queryClient.ts
+  src/styles/globals.css
+  public/manifest.webmanifest
+  public/offline.html
+  public/icons/* (placeholders)
+  src/sw.js (service worker)
+Server (Node/Express)
+Env:
+MEALDB_API_BASE=https://www.themealdb.com/api/json/v1
+MEALDB_API_KEY=1
+PORT=5174 (or 3001)
+Routes:
+GET /api/search → search.php?s=...
+GET /api/meal/:id → lookup.php?i=...
+GET /api/categories → categories.php
+GET /api/filter → filter.php?c=...
+Optional: GET /api/random → random.php
+Add caching headers and in-memory TTL cache for categories.
+Include CORS, helmet, compression, and robust error handling.
+Never expose the API key to the client.
+Proxy fetch format:
+fetch(`${MEALDB_API_BASE}/${MEALDB_API_KEY}/search.php?s=...`)
+Client (React + Vite + Tailwind + shadcn/ui)
+Setup: Vite + Tailwind + shadcn configured properly.
+
+Themeable UI:
+Header with app name, search input, and theme toggle.
+
+Pages:
+
+Home: Search bar, category chips, results grid (cards with image, title, category, area, favorite button).
+Details: Full recipe view (ingredients, instructions, tags, YouTube link), favorite toggle.
+Favorites: Grid of locally saved meals (viewable offline), with sort/filter/remove buttons.
+Favorites Persistence:
+Store favorites in IndexedDB keyed by meal ID.
+Utility functions: saveFavorite, removeFavorite, getFavorite, getAllFavorites.
+
+Offline UX:
+
+Toast when offline
+Show cached data if available
+If no cached data, show offline.html fallback
+Service Worker:
+Manual (no Workbox).
+
+Implement precache list + versioning
+Runtime strategies caching /api/* responses
+Quality:
+
+Skeleton loaders for cards and details
+Error boundaries and empty states
+Mobile-first responsive layout
+Accessibility (labels, aria-pressed, focus outlines, skip links)
+DX & Scripts
+Root README must include setup instructions:
+
+cd server && cp .env.example .env && npm i && npm run dev
+cd client && npm i && npm run dev
+Include notes for:
+
+shadcn setup (init steps for Vite + Tailwind)
+Build scripts and deploy suggestions (Render for server, Netlify/Vercel for client)
+Security
+Never expose API keys
+Client calls only /api/*
+Server uses MEALDB_API_KEY and MEALDB_API_BASE securely
+Deliverables
+Full runnable code for every file listed
+Comments explaining non-trivial logic (SW caching, IndexedDB, proxy forwarding)
+Placeholder icons for manifest
+Format
+Return one complete response containing:
+
+Project Tree (in a code block)
+Full code for each file — each in its own fenced code block with the correct file path as the title (e.g., // server/src/index.ts)
+README.md at repo root including:
+Overview, features, tech stack
+Setup instructions
+Environment variables
+shadcn install steps
+PWA details (offline testing)
+Notes on caching strategies and how to change them
+Post-generation checklist (e.g., generate shadcn components, replace icons)
+Acceptance Criteria
+✅ App runs locally with server and client concurrently
+✅ Client uses only /api/* endpoints
+✅ Favorites work offline (add/view/remove) using IndexedDB
+✅ PWA is installable and precaches app shell
+✅ Search, categories, and detail views all functional
+✅ Skeletons and error states implemented
+✅ No API key exposure — server reads MEALDB_API_KEY (default 1)
